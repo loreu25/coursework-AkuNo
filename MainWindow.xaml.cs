@@ -1,5 +1,6 @@
 using System.Linq;
 using System.Windows;
+using System.Windows.Controls;
 using Microsoft.EntityFrameworkCore;
 using WpfApp1.Data;
 using WpfApp1.Models;
@@ -18,13 +19,30 @@ namespace WpfApp1
         {
             InitializeComponent();
             _context = new StoreContext();
-            _context.Database.EnsureCreated();
-            LoadProducts();
+            try
+            {
+                _context.Database.EnsureCreated();
+                LoadProducts();
+            }
+            catch (System.Exception ex)
+            {
+                MessageBox.Show($"Ошибка при инициализации базы данных: {ex.Message}", 
+                              "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void LoadProducts()
         {
-            dgProducts.ItemsSource = _context.Products.ToList();
+            try
+            {
+                var products = _context.Products.ToList();
+                lvProducts.ItemsSource = products;
+            }
+            catch (System.Exception ex)
+            {
+                MessageBox.Show($"Ошибка при загрузке товаров: {ex.Message}", 
+                              "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void btnAddProduct_Click(object sender, RoutedEventArgs e)
@@ -40,15 +58,23 @@ namespace WpfApp1
             var editWindow = new EditProductWindow(product);
             if (editWindow.ShowDialog() == true)
             {
-                _context.Products.Add(product);
-                _context.SaveChanges();
-                LoadProducts();
+                try
+                {
+                    _context.Products.Add(product);
+                    _context.SaveChanges();
+                    LoadProducts();
+                }
+                catch (System.Exception ex)
+                {
+                    MessageBox.Show($"Ошибка при сохранении товара: {ex.Message}", 
+                                  "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
         }
 
         private void btnEditProduct_Click(object sender, RoutedEventArgs e)
         {
-            var selectedProduct = dgProducts.SelectedItem as Product;
+            var selectedProduct = lvProducts.SelectedItem as Product;
             if (selectedProduct == null)
             {
                 MessageBox.Show("Выберите товар для редактирования");
@@ -58,26 +84,43 @@ namespace WpfApp1
             var editWindow = new EditProductWindow(selectedProduct);
             if (editWindow.ShowDialog() == true)
             {
-                _context.SaveChanges();
-                LoadProducts();
+                try
+                {
+                    _context.SaveChanges();
+                    LoadProducts();
+                }
+                catch (System.Exception ex)
+                {
+                    MessageBox.Show($"Ошибка при сохранении изменений: {ex.Message}", 
+                                  "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
         }
 
         private void btnDeleteProduct_Click(object sender, RoutedEventArgs e)
         {
-            var selectedProduct = dgProducts.SelectedItem as Product;
+            var selectedProduct = lvProducts.SelectedItem as Product;
             if (selectedProduct == null)
             {
                 MessageBox.Show("Выберите товар для удаления");
                 return;
             }
 
-            var result = MessageBox.Show("Вы уверены, что хотите удалить этот товар?", "Подтверждение", MessageBoxButton.YesNo);
+            var result = MessageBox.Show("Вы уверены, что хотите удалить этот товар?", 
+                                       "Подтверждение", MessageBoxButton.YesNo);
             if (result == MessageBoxResult.Yes)
             {
-                _context.Products.Remove(selectedProduct);
-                _context.SaveChanges();
-                LoadProducts();
+                try
+                {
+                    _context.Products.Remove(selectedProduct);
+                    _context.SaveChanges();
+                    LoadProducts();
+                }
+                catch (System.Exception ex)
+                {
+                    MessageBox.Show($"Ошибка при удалении товара: {ex.Message}", 
+                                  "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
         }
 
@@ -86,10 +129,18 @@ namespace WpfApp1
             var saleWindow = new NewSaleWindow(_context);
             if (saleWindow.ShowDialog() == true)
             {
-                _context.Sales.Add(saleWindow.Sale);
-                _context.SaveChanges();
-                LoadProducts();
-                MessageBox.Show($"Продажа оформлена на сумму {saleWindow.Sale.TotalPrice} руб.", "Успех");
+                try
+                {
+                    _context.Sales.Add(saleWindow.Sale);
+                    _context.SaveChanges();
+                    LoadProducts();
+                    MessageBox.Show($"Продажа оформлена на сумму {saleWindow.Sale.TotalPrice} руб.", "Успех");
+                }
+                catch (System.Exception ex)
+                {
+                    MessageBox.Show($"Ошибка при оформлении продажи: {ex.Message}", 
+                                  "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
         }
     }
