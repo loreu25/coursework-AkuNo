@@ -22,17 +22,20 @@ namespace WpfApp1.Data
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Name).IsRequired();
                 entity.Property(e => e.Price).HasColumnType("decimal(18,2)");
-                entity.Property(e => e.ImageData).HasColumnType("BLOB");
+                entity.Property(e => e.ImageData).HasColumnType("BLOB").IsRequired(false);
+                entity.Property(e => e.ImagePath).HasMaxLength(500).IsRequired(false);
             });
 
             modelBuilder.Entity<Sale>(entity =>
             {
                 entity.HasKey(e => e.Id);
+                entity.Property(e => e.TotalPrice).HasColumnType("decimal(18,2)");
+                entity.Property(e => e.Date).IsRequired();
+                
                 entity.HasOne(e => e.Product)
                       .WithMany()
                       .HasForeignKey(e => e.ProductId)
                       .OnDelete(DeleteBehavior.Restrict);
-                entity.Property(e => e.TotalPrice).HasColumnType("decimal(18,2)");
             });
         }
     }

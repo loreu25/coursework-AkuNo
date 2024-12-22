@@ -73,7 +73,7 @@
                         <TextBlock Grid.Row="1" Text="{Binding Name}" 
                                    FontWeight="Bold" Margin="5"/>
                         <TextBlock Grid.Row="2" 
-                                   Text="{Binding Price, StringFormat='{}{0:C}'}" 
+                                   Text="{Binding Price, StringFormat='{}{0:N2} ₽'}" 
                                    Foreground="Green" Margin="5"/>
                         <TextBlock Grid.Row="3" 
                                    Text="{Binding StockQuantity, StringFormat='В наличии: {0}'}" 

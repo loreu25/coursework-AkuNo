@@ -129,18 +129,7 @@ namespace WpfApp1
             var saleWindow = new NewSaleWindow(_context);
             if (saleWindow.ShowDialog() == true)
             {
-                try
-                {
-                    _context.Sales.Add(saleWindow.Sale);
-                    _context.SaveChanges();
-                    LoadProducts();
-                    MessageBox.Show($"Продажа оформлена на сумму {saleWindow.Sale.TotalPrice} руб.", "Успех");
-                }
-                catch (System.Exception ex)
-                {
-                    MessageBox.Show($"Ошибка при оформлении продажи: {ex.Message}", 
-                                  "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
+                LoadProducts(); // Обновляем список товаров после продажи
             }
         }
     }
