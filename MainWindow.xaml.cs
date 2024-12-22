@@ -35,7 +35,11 @@ namespace WpfApp1
         {
             try
             {
-                var products = _context.Products.ToList();
+                var products = _context.Products
+                    .Include(p => p.Category)
+                    .OrderBy(p => p.Category.Name)
+                    .ThenBy(p => p.Name)
+                    .ToList();
                 lvProducts.ItemsSource = products;
             }
             catch (System.Exception ex)

@@ -1,42 +1,59 @@
+using Microsoft.Win32;
 using System;
 using System.IO;
+using System.Linq;
 using System.Windows;
-using System.Windows.Media.Imaging;
-using Microsoft.Win32;
+using WpfApp1.Data;
 using WpfApp1.Models;
 
 namespace WpfApp1.Views
 {
     public partial class EditProductWindow : Window
     {
-        public Product Product { get; private set; }
+        private readonly Product _product;
+        private readonly StoreContext _context;
         private string _selectedImagePath;
 
         public EditProductWindow(Product product)
         {
             InitializeComponent();
-            Product = product;
-            LoadProduct();
-        }
+            _product = product;
+            _context = new StoreContext();
+            LoadCategories();
+            DataContext = _product;
 
-        private void LoadProduct()
-        {
-            txtName.Text = Product.Name;
-            txtDescription.Text = Product.Description;
-            txtPrice.Text = Product.Price.ToString();
-            txtQuantity.Text = Product.StockQuantity.ToString();
-
-            if (Product.ImageData != null && Product.ImageData.Length > 0)
+            if (_product.ImageData != null)
             {
-                using (var ms = new MemoryStream(Product.ImageData))
+                try
                 {
-                    var image = new BitmapImage();
+                    var image = new System.Windows.Media.Imaging.BitmapImage();
                     image.BeginInit();
-                    image.CacheOption = BitmapCacheOption.OnLoad;
-                    image.StreamSource = ms;
+                    image.StreamSource = new MemoryStream(_product.ImageData);
                     image.EndInit();
                     imgProduct.Source = image;
                 }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Ошибка при загрузке изображения: {ex.Message}");
+                }
+            }
+        }
+
+        private void LoadCategories()
+        {
+            try
+            {
+                var categories = _context.Categories.OrderBy(c => c.Name).ToList();
+                cmbCategory.ItemsSource = categories;
+
+                if (_product.CategoryId == 0 && categories.Any())
+                {
+                    _product.CategoryId = categories.First().Id;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при загрузке категорий: {ex.Message}");
             }
         }
 
@@ -49,40 +66,51 @@ namespace WpfApp1.Views
 
             if (openFileDialog.ShowDialog() == true)
             {
-                _selectedImagePath = openFileDialog.FileName;
-                imgProduct.Source = new BitmapImage(new Uri(_selectedImagePath));
+                try
+                {
+                    _selectedImagePath = openFileDialog.FileName;
+                    _product.ImagePath = Path.GetFileName(_selectedImagePath);
+                    _product.ImageData = File.ReadAllBytes(_selectedImagePath);
+
+                    var image = new System.Windows.Media.Imaging.BitmapImage();
+                    image.BeginInit();
+                    image.StreamSource = new MemoryStream(_product.ImageData);
+                    image.EndInit();
+                    imgProduct.Source = image;
+
+                    txtImagePath.Text = _product.ImagePath;
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Ошибка при загрузке изображения: {ex.Message}");
+                }
             }
         }
 
         private void btnSave_Click(object sender, RoutedEventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(txtName.Text))
+            if (string.IsNullOrWhiteSpace(_product.Name))
             {
                 MessageBox.Show("Введите название товара");
                 return;
             }
 
-            if (!decimal.TryParse(txtPrice.Text, out decimal price))
+            if (_product.Price <= 0)
             {
-                MessageBox.Show("Введите корректную цену");
+                MessageBox.Show("Цена должна быть больше нуля");
                 return;
             }
 
-            if (!int.TryParse(txtQuantity.Text, out int quantity))
+            if (_product.StockQuantity < 0)
             {
-                MessageBox.Show("Введите корректное количество");
+                MessageBox.Show("Количество не может быть отрицательным");
                 return;
             }
 
-            Product.Name = txtName.Text;
-            Product.Description = txtDescription.Text;
-            Product.Price = price;
-            Product.StockQuantity = quantity;
-
-            if (!string.IsNullOrEmpty(_selectedImagePath))
+            if (_product.CategoryId == 0)
             {
-                Product.ImageData = File.ReadAllBytes(_selectedImagePath);
-                Product.ImagePath = _selectedImagePath;
+                MessageBox.Show("Выберите категорию товара");
+                return;
             }
 
             DialogResult = true;

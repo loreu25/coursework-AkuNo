@@ -25,5 +25,10 @@ namespace WpfApp1.Models
 
         [StringLength(500)]
         public string ImagePath { get; set; }
+
+        public int CategoryId { get; set; }
+
+        [ForeignKey("CategoryId")]
+        public virtual Category Category { get; set; }
     }
 }
