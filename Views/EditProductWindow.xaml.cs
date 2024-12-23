@@ -206,7 +206,8 @@ namespace WpfApp1.Views
                 return;
             }
 
-            if (!decimal.TryParse(txtPrice.Text, out decimal price))
+            decimal price;
+            if (!decimal.TryParse(txtPrice.Text.Replace('.', ','), out price))
             {
                 MessageBox.Show("Пожалуйста, введите корректную цену");
                 return;
