@@ -1,16 +1,13 @@
-using System.Linq;
-using System.Windows;
-using System.Windows.Controls;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Windows;
 using WpfApp1.Data;
 using WpfApp1.Models;
 using WpfApp1.Views;
+using System.Linq;
 
 namespace WpfApp1
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
         private readonly StoreContext _context;
@@ -24,7 +21,7 @@ namespace WpfApp1
                 _context.Database.EnsureCreated();
                 LoadProducts();
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
                 MessageBox.Show($"Ошибка при инициализации базы данных: {ex.Message}", 
                               "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -42,7 +39,7 @@ namespace WpfApp1
                     .ToList();
                 lvProducts.ItemsSource = products;
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
                 MessageBox.Show($"Ошибка при загрузке товаров: {ex.Message}", 
                               "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -51,28 +48,10 @@ namespace WpfApp1
 
         private void btnAddProduct_Click(object sender, RoutedEventArgs e)
         {
-            var product = new Product
+            var window = new EditProductWindow(null, _context);
+            if (window.ShowDialog() == true)
             {
-                Name = "Новый товар",
-                Description = "Описание",
-                Price = 0,
-                StockQuantity = 0
-            };
-
-            var editWindow = new EditProductWindow(product);
-            if (editWindow.ShowDialog() == true)
-            {
-                try
-                {
-                    _context.Products.Add(product);
-                    _context.SaveChanges();
-                    LoadProducts();
-                }
-                catch (System.Exception ex)
-                {
-                    MessageBox.Show($"Ошибка при сохранении товара: {ex.Message}", 
-                                  "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
+                LoadProducts();
             }
         }
 
@@ -85,19 +64,10 @@ namespace WpfApp1
                 return;
             }
 
-            var editWindow = new EditProductWindow(selectedProduct);
-            if (editWindow.ShowDialog() == true)
+            var window = new EditProductWindow(selectedProduct, _context);
+            if (window.ShowDialog() == true)
             {
-                try
-                {
-                    _context.SaveChanges();
-                    LoadProducts();
-                }
-                catch (System.Exception ex)
-                {
-                    MessageBox.Show($"Ошибка при сохранении изменений: {ex.Message}", 
-                                  "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
+                LoadProducts();
             }
         }
 
@@ -110,8 +80,11 @@ namespace WpfApp1
                 return;
             }
 
-            var result = MessageBox.Show("Вы уверены, что хотите удалить этот товар?", 
-                                       "Подтверждение", MessageBoxButton.YesNo);
+            var result = MessageBox.Show("Вы действительно хотите удалить этот товар?",
+                                       "Подтверждение",
+                                       MessageBoxButton.YesNo,
+                                       MessageBoxImage.Question);
+
             if (result == MessageBoxResult.Yes)
             {
                 try
@@ -120,9 +93,9 @@ namespace WpfApp1
                     _context.SaveChanges();
                     LoadProducts();
                 }
-                catch (System.Exception ex)
+                catch (Exception ex)
                 {
-                    MessageBox.Show($"Ошибка при удалении товара: {ex.Message}", 
+                    MessageBox.Show($"Ошибка при удалении товара: {ex.Message}",
                                   "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
@@ -130,11 +103,16 @@ namespace WpfApp1
 
         private void btnNewSale_Click(object sender, RoutedEventArgs e)
         {
-            var saleWindow = new NewSaleWindow(_context);
-            if (saleWindow.ShowDialog() == true)
+            var window = new NewSaleWindow(_context);
+            if (window.ShowDialog() == true)
             {
-                LoadProducts(); // Обновляем список товаров после продажи
+                LoadProducts();
             }
+        }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            _context.Dispose();
         }
     }
 }

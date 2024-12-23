@@ -6,49 +6,43 @@ namespace WpfApp1.Data
     public class StoreContext : DbContext
     {
         public DbSet<Product> Products { get; set; }
-        public DbSet<Sale> Sales { get; set; }
         public DbSet<Category> Categories { get; set; }
+        public DbSet<Sale> Sales { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlite("Data Source=store.db");
+            optionsBuilder.UseSqlite("Data Source=store.db")
+                         .EnableDetailedErrors()
+                         .EnableSensitiveDataLogging();
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<Category>(entity =>
+            modelBuilder.Entity<Product>(entity =>
             {
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Name).IsRequired().HasMaxLength(100);
                 entity.Property(e => e.Description).HasMaxLength(500);
-            });
-
-            modelBuilder.Entity<Product>(entity =>
-            {
-                entity.HasKey(e => e.Id);
-                entity.Property(e => e.Name).IsRequired();
                 entity.Property(e => e.Price).HasColumnType("decimal(18,2)");
-                entity.Property(e => e.ImageData).HasColumnType("BLOB").IsRequired(false);
-                entity.Property(e => e.ImagePath).HasMaxLength(500).IsRequired(false);
+                entity.Property(e => e.ImagePath).HasMaxLength(500);
 
                 entity.HasOne(e => e.Category)
                       .WithMany(c => c.Products)
                       .HasForeignKey(e => e.CategoryId)
                       .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasDiscriminator<string>("ProductType")
+                      .HasValue<FoodProduct>("Food")
+                      .HasValue<NonFoodProduct>("NonFood");
             });
 
-            modelBuilder.Entity<Sale>(entity =>
+            modelBuilder.Entity<Category>(entity =>
             {
                 entity.HasKey(e => e.Id);
-                entity.Property(e => e.TotalPrice).HasColumnType("decimal(18,2)");
-                entity.Property(e => e.Date).IsRequired();
-                
-                entity.HasOne(e => e.Product)
-                      .WithMany()
-                      .HasForeignKey(e => e.ProductId)
-                      .OnDelete(DeleteBehavior.Cascade); 
+                entity.Property(e => e.Name).IsRequired().HasMaxLength(100);
+                entity.Property(e => e.Description).HasMaxLength(500);
             });
 
             modelBuilder.Entity<Category>().HasData(
@@ -59,7 +53,11 @@ namespace WpfApp1.Data
                 new Category { Id = 5, Name = "Напитки", Description = "Соки, воды, газированные напитки" },
                 new Category { Id = 6, Name = "Бакалея", Description = "Крупы, макароны, масла, консервы" },
                 new Category { Id = 7, Name = "Кондитерские изделия", Description = "Конфеты, печенье, шоколад" },
-                new Category { Id = 8, Name = "Замороженные продукты", Description = "Замороженные овощи, полуфабрикаты" }
+                new Category { Id = 8, Name = "Замороженные продукты", Description = "Замороженные овощи, полуфабрикаты" },
+                new Category { Id = 9, Name = "Бытовая химия", Description = "Моющие и чистящие средства" },
+                new Category { Id = 10, Name = "Товары для дома", Description = "Посуда, инвентарь, хозтовары" },
+                new Category { Id = 11, Name = "Канцтовары", Description = "Бумага, ручки, карандаши" },
+                new Category { Id = 12, Name = "Электротовары", Description = "Батарейки, лампочки, удлинители" }
             );
         }
     }

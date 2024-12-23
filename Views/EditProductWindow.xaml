@@ -1,8 +1,7 @@
 <Window x:Class="WpfApp1.Views.EditProductWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Редактирование товара" Height="450" Width="400"
-        WindowStartupLocation="CenterOwner">
+        Title="Редактирование товара" Height="600" Width="800">
     <Grid Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -15,49 +14,98 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="150"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <Label Content="Название:" Grid.Row="0" Grid.Column="0" Margin="0,0,10,5"/>
-        <TextBox x:Name="txtName" Grid.Row="0" Grid.Column="1" Margin="0,0,0,5"
-                 Text="{Binding Name}"/>
+        <!-- Тип товара -->
+        <Label Content="Тип товара:" Grid.Row="0" Grid.Column="0" Margin="0,0,0,5"/>
+        <ComboBox x:Name="cmbProductType" Grid.Row="0" Grid.Column="1" Margin="0,0,0,5" SelectionChanged="cmbProductType_SelectionChanged">
+            <ComboBoxItem Content="Продовольственный"/>
+            <ComboBoxItem Content="Непродовольственный"/>
+        </ComboBox>
 
-        <Label Content="Описание:" Grid.Row="1" Grid.Column="0" Margin="0,0,10,5"/>
-        <TextBox x:Name="txtDescription" Grid.Row="1" Grid.Column="1" Margin="0,0,0,5"
-                 Text="{Binding Description}" Height="60" TextWrapping="Wrap" 
-                 AcceptsReturn="True" VerticalScrollBarVisibility="Auto"/>
+        <!-- Основные поля -->
+        <Label Content="Название:" Grid.Row="1" Grid.Column="0" Margin="0,0,0,5"/>
+        <TextBox x:Name="txtName" Grid.Row="1" Grid.Column="1" Margin="0,0,0,5"/>
 
-        <Label Content="Цена:" Grid.Row="2" Grid.Column="0" Margin="0,0,10,5"/>
-        <TextBox x:Name="txtPrice" Grid.Row="2" Grid.Column="1" Margin="0,0,0,5"
-                 Text="{Binding Price}"/>
+        <Label Content="Описание:" Grid.Row="2" Grid.Column="0" Margin="0,0,0,5"/>
+        <TextBox x:Name="txtDescription" Grid.Row="2" Grid.Column="1" Margin="0,0,0,5" TextWrapping="Wrap" AcceptsReturn="True" Height="60"/>
 
-        <Label Content="Количество:" Grid.Row="3" Grid.Column="0" Margin="0,0,10,5"/>
-        <TextBox x:Name="txtQuantity" Grid.Row="3" Grid.Column="1" Margin="0,0,0,5"
-                 Text="{Binding StockQuantity}"/>
+        <Label Content="Цена:" Grid.Row="3" Grid.Column="0" Margin="0,0,0,5"/>
+        <TextBox x:Name="txtPrice" Grid.Row="3" Grid.Column="1" Margin="0,0,0,5"/>
 
-        <Label Content="Категория:" Grid.Row="4" Grid.Column="0" Margin="0,0,10,5"/>
-        <ComboBox x:Name="cmbCategory" Grid.Row="4" Grid.Column="1" Margin="0,0,0,5"
-                  DisplayMemberPath="Name"
-                  SelectedValuePath="Id"
-                  SelectedValue="{Binding CategoryId}"/>
+        <Label Content="Количество:" Grid.Row="4" Grid.Column="0" Margin="0,0,0,5"/>
+        <TextBox x:Name="txtQuantity" Grid.Row="4" Grid.Column="1" Margin="0,0,0,5"/>
 
-        <Label Content="Изображение:" Grid.Row="5" Grid.Column="0" Margin="0,0,10,5"/>
-        <StackPanel Grid.Row="5" Grid.Column="1" Orientation="Horizontal" Margin="0,0,0,5">
-            <Button x:Name="btnSelectImage" Content="Выбрать файл" Click="btnSelectImage_Click"/>
-            <TextBlock x:Name="txtImagePath" Text="{Binding ImagePath}" Margin="10,0,0,0" 
-                       VerticalAlignment="Center"/>
+        <Label Content="Категория:" Grid.Row="5" Grid.Column="0" Margin="0,0,0,5"/>
+        <ComboBox x:Name="cmbCategory" Grid.Row="5" Grid.Column="1" Margin="0,0,0,5"/>
+
+        <!-- Специфические поля -->
+        <Grid Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2">
+            <!-- Поля для продовольственных товаров -->
+            <Grid x:Name="foodGroup" Visibility="Visible">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="150"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Label Content="Срок годности:" Grid.Row="0" Grid.Column="0" Margin="0,0,0,5"/>
+                <DatePicker x:Name="dpExpirationDate" Grid.Row="0" Grid.Column="1" Margin="0,0,0,5"/>
+
+                <Label Content="Требует охлаждения:" Grid.Row="1" Grid.Column="0" Margin="0,0,0,5"/>
+                <CheckBox x:Name="chkRefrigeration" Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" Margin="0,0,0,5"/>
+
+                <Label Content="Условия хранения:" Grid.Row="2" Grid.Column="0" Margin="0,0,0,5"/>
+                <TextBox x:Name="txtStorageConditions" Grid.Row="2" Grid.Column="1" Margin="0,0,0,5"/>
+
+                <Label Content="Пищевая ценность:" Grid.Row="3" Grid.Column="0" Margin="0,0,0,5"/>
+                <TextBox x:Name="txtNutritionalValue" Grid.Row="3" Grid.Column="1" Margin="0,0,0,5"/>
+            </Grid>
+
+            <!-- Поля для непродовольственных товаров -->
+            <Grid x:Name="nonFoodGroup" Visibility="Collapsed">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="150"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Label Content="Бренд:" Grid.Row="0" Grid.Column="0" Margin="0,0,0,5"/>
+                <TextBox x:Name="txtBrand" Grid.Row="0" Grid.Column="1" Margin="0,0,0,5"/>
+
+                <Label Content="Производитель:" Grid.Row="1" Grid.Column="0" Margin="0,0,0,5"/>
+                <TextBox x:Name="txtManufacturer" Grid.Row="1" Grid.Column="1" Margin="0,0,0,5"/>
+
+                <Label Content="Страна производства:" Grid.Row="2" Grid.Column="0" Margin="0,0,0,5"/>
+                <TextBox x:Name="txtCountryOfOrigin" Grid.Row="2" Grid.Column="1" Margin="0,0,0,5"/>
+
+                <Label Content="Гарантийный срок:" Grid.Row="3" Grid.Column="0" Margin="0,0,0,5"/>
+                <TextBox x:Name="txtWarrantyPeriod" Grid.Row="3" Grid.Column="1" Margin="0,0,0,5"/>
+            </Grid>
+        </Grid>
+
+        <!-- Изображение -->
+        <StackPanel Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal">
+            <Button x:Name="btnSelectImage" Content="Выбрать изображение" Click="btnSelectImage_Click" Margin="0,5,5,0"/>
+            <TextBox x:Name="txtImagePath" IsReadOnly="True" Width="300" Margin="0,5,0,0"/>
         </StackPanel>
 
-        <Image x:Name="imgProduct" Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2" 
-               Margin="0,5" Stretch="Uniform"/>
-
-        <StackPanel Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="2" 
-                    Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
-            <Button x:Name="btnSave" Content="Сохранить" Width="80" Margin="0,0,10,0" 
-                    Click="btnSave_Click"/>
-            <Button x:Name="btnCancel" Content="Отмена" Width="80" 
-                    Click="btnCancel_Click"/>
+        <!-- Кнопки -->
+        <StackPanel Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+            <Button x:Name="btnSave" Content="Сохранить" Width="100" Click="btnSave_Click" Margin="0,0,10,0"/>
+            <Button x:Name="btnCancel" Content="Отмена" Width="100" IsCancel="True"/>
         </StackPanel>
     </Grid>
 </Window>

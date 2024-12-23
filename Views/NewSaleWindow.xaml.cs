@@ -112,12 +112,6 @@ namespace WpfApp1.Views
                     {
                         foreach (var item in _cartItems)
                         {
-                            if (item.Product == null || item.Product.Id == 0)
-                            {
-                                MessageBox.Show("Ошибка: некорректные данные товара");
-                                return;
-                            }
-
                             var product = _context.Products.Find(item.Product.Id);
                             if (product == null)
                             {
@@ -135,7 +129,7 @@ namespace WpfApp1.Views
 
                             var sale = new Sale
                             {
-                                ProductId = product.Id,
+                                Product = product,
                                 Quantity = item.Quantity,
                                 TotalPrice = item.Total,
                                 Date = now
@@ -159,8 +153,7 @@ namespace WpfApp1.Views
             }
             catch (Exception ex)
             {
-                var message = ex.InnerException?.Message ?? ex.Message;
-                MessageBox.Show($"Ошибка при оформлении продажи: {message}\n\nStack trace: {ex.StackTrace}", "Ошибка");
+                MessageBox.Show($"Ошибка при оформлении продажи: {ex.Message}", "Ошибка");
             }
         }
 
@@ -182,8 +175,6 @@ namespace WpfApp1.Views
             get => _product;
             set
             {
-                if (value == null)
-                    throw new ArgumentNullException(nameof(value), "Product cannot be null");
                 _product = value;
                 UpdateTotal();
                 OnPropertyChanged(nameof(Product));
@@ -195,8 +186,6 @@ namespace WpfApp1.Views
             get => _quantity;
             set
             {
-                if (value <= 0)
-                    throw new ArgumentException("Quantity must be greater than zero", nameof(value));
                 _quantity = value;
                 UpdateTotal();
                 OnPropertyChanged(nameof(Quantity));
@@ -215,9 +204,10 @@ namespace WpfApp1.Views
 
         public void UpdateTotal()
         {
-            if (Product == null)
-                throw new InvalidOperationException("Cannot calculate total: Product is null");
-            Total = Product.Price * Quantity;
+            if (Product != null)
+            {
+                Total = Product.Price * Quantity;
+            }
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
